@@ -1,0 +1,11 @@
+html, body {
+  margin: 0;
+  font-family: sans-serif;
+  color: rgb(255, 255, 255);
+  background-color: rgb(60, 60, 65);
+
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
