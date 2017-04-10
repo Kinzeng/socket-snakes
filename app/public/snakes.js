@@ -105,7 +105,9 @@ function draw () {
       textSize(16)
       text('Score: ' + score, width / 2, 80)
       text('Press space to restart', width / 2, 100)
-      text('Press R to view replay', width / 2, 120)
+      if (allReplays.length > 0) {
+        text('Press R to view replay', width / 2, 120)
+      }
     }
   }
 }
@@ -123,7 +125,7 @@ function keyPressed () {
     direction = RIGHT
   } else if (keyCode === 32 && gameOver) {
     reset()
-  } else if (keyCode === 82 && gameOver) {
+  } else if (keyCode === 82 && gameOver && allReplays.length > 0) {
     replay = true
     replayIndex = 0
   }
@@ -192,8 +194,10 @@ function directionFrom (coords1, coords2) {
 
 function finishGame () {
   gameOver = true
-  allReplays.push([replaySnake, curColor])
-  maxLength = Math.max(maxLength, replaySnake.length)
-  // send request to server, push replaySnake
-  socket.emit('gameOver', [replaySnake, curColor])
+  if (JSON.parse(replaySnake[replaySnake.length - 1][0]).length > 20) {
+    console.log(replaySnake)
+    allReplays.push([replaySnake, curColor])
+    maxLength = Math.max(maxLength, replaySnake.length)
+    socket.emit('gameOver', [replaySnake, curColor])
+  }
 }
