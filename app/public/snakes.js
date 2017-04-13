@@ -195,7 +195,6 @@ function directionFrom (coords1, coords2) {
 function finishGame () {
   gameOver = true
   if (JSON.parse(replaySnake[replaySnake.length - 1][0]).length > 20) {
-    console.log(replaySnake)
     allReplays.push([replaySnake, curColor])
     maxLength = Math.max(maxLength, replaySnake.length)
     socket.emit('gameOver', [replaySnake, curColor])

@@ -19,16 +19,16 @@ io.on('connection', function (client) {
   })
 })
 
+app.get('/', function (req, res) {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
+})
+
 app.get('/replays', function (req, res) {
   res.sendFile(path.join(__dirname, '..', 'public', 'replays.html'))
 })
 
-app.use(function (req, res) {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'))
-})
-
 app.use(function (err, req, res, next) {
-  return res.json({
+  res.json({
     error: err.status,
     message: err.message
   })
