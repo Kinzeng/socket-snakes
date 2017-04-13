@@ -24,11 +24,11 @@ var allReplays
 var maxLength
 
 var socket = io.connect('http://localhost:8080')
-socket.on('init', function (replays) {
-  allReplays = replays
+socket.on('init', function (data) {
+  allReplays = data.replays
 })
-socket.on('newReplay', function (replay) {
-  allReplays.push(replay)
+socket.on('newReplay', function (data) {
+  allReplays.push(data.replay)
 })
 
 function setup () {
@@ -197,6 +197,8 @@ function finishGame () {
   if (JSON.parse(replaySnake[replaySnake.length - 1][0]).length > 20) {
     allReplays.push([replaySnake, curColor])
     maxLength = Math.max(maxLength, replaySnake.length)
-    socket.emit('gameOver', [replaySnake, curColor])
+    socket.emit('gameOver', {
+      replay: [replaySnake, curColor]
+    })
   }
 }

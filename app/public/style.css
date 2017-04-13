@@ -9,3 +9,7 @@ html, body {
   justify-content: flex-start;
   align-items: center;
 }
+
+.options {
+  margin: 1em 0;
+}

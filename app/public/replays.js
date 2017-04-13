@@ -24,8 +24,8 @@ var allReplays
 var maxLength
 
 var socket = io.connect('http://localhost:8080')
-socket.on('init', function (replays) {
-  allReplays = replays
+socket.on('init', function (data) {
+  allReplays = data.replays
   maxLength = allReplays.reduce(function (max, cur) {
     return Math.max(max, cur[0].length)
   }, 0)
@@ -76,4 +76,19 @@ function drawFood (food) {
   stroke(255, 0, 0)
   fill(255, 0, 0)
   rect(food[0] + 1, food[1] + 1, 8, 8)
+}
+
+function fetchReplays (num) {
+  getJson('/api/replays?n=' + num, function (data) {
+    allReplays = data.replays
+  })
+}
+
+function getJson (url, callback) {
+  var req = new window.XMLHttpRequest()
+  req.addEventListener('load', function () {
+    callback(JSON.parse(this.responseText))
+  })
+  req.open('GET', url, true)
+  req.send()
 }
