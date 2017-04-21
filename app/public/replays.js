@@ -21,17 +21,23 @@ var replayIndex
 var replaySnake
 
 var allReplays
+var numReplays = 20
 var maxLength
 
 var socket = io.connect('http://localhost:8080')
 socket.on('init', function (data) {
-  allReplays = data.replays
-  maxLength = allReplays.reduce(function (max, cur) {
-    return Math.max(max, cur[0].length)
-  }, 0)
+  setReplays(data.replays)
 })
-socket.on('newReplay', function (replay) {
-  allReplays.push(replay)
+socket.on('newReplay', function (data) {
+  allReplays.push(data.replay)
+  if (allReplays.length > numReplays) {
+    allReplays.shift()
+  }
+
+  setReplays(allReplays)
+})
+socket.on('deleteReplays', function (data) {
+  setReplays([])
 })
 
 function setup () {
@@ -40,14 +46,14 @@ function setup () {
 }
 
 function draw () {
-  background(255)
+  background(0)
   if (replayIndex <= maxLength) {
     allReplays.forEach(function (replay) {
-      if (replay[0][replayIndex]) {
-        var color = replay[1]
-        var curReplay = replay[0][replayIndex]
-        var replayFood = curReplay[1]
-        drawSnake(JSON.parse(curReplay[0]), color)
+      if (replay.points[replayIndex]) {
+        var color = replay.color
+        var curReplay = replay.points[replayIndex]
+        var replayFood = curReplay.food
+        drawSnake(JSON.parse(curReplay.snake), color)
         drawFood(replayFood)
       }
     })
@@ -64,23 +70,21 @@ function keyPressed () {
   }
 }
 
-function drawSnake (snake, color) {
-  stroke(color[0], color[1], color[2])
-  fill(color[0], color[1], color[2])
-  snake.forEach(function (coords) {
-    rect(coords[0] + 1, coords[1] + 1, 8, 8)
-  })
+function setReplays (replays) {
+  allReplays = replays
+  maxLength = allReplays.reduce(function (max, cur) {
+    return Math.max(max, cur.points.length)
+  }, 0)
 }
 
-function drawFood (food) {
-  stroke(255, 0, 0)
-  fill(255, 0, 0)
-  rect(food[0] + 1, food[1] + 1, 8, 8)
+function onNumChange () {
+  numReplays = parseInt(document.getElementById('num').value)
+  fetchReplays(numReplays)
 }
 
 function fetchReplays (num) {
   getJson('/api/replays?n=' + num, function (data) {
-    allReplays = data.replays
+    setReplays(data.replays)
   })
 }
 
@@ -90,5 +94,14 @@ function getJson (url, callback) {
     callback(JSON.parse(this.responseText))
   })
   req.open('GET', url, true)
+  req.send()
+}
+
+function deleteJson (url, callback) {
+  var req = new window.XMLHttpRequest()
+  req.addEventListener('load', function () {
+    callback(JSON.parse(this.responseText))
+  })
+  req.open('DELETE', url, true)
   req.send()
 }

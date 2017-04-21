@@ -10,6 +10,24 @@ html, body {
   align-items: center;
 }
 
+input {
+  margin: 0 0.5em;
+}
+
 .options {
   margin: 1em 0;
+
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.option {
+  margin: 0.5em 0;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
 }

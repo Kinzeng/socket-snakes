@@ -6,15 +6,19 @@ window.addEventListener('keydown', function (e) {
 
 var snake
 
-var UP = 0
-var DOWN = 1
-var LEFT = 2
-var RIGHT = 3
+var DUP = 0
+var DDOWN = 1
+var DLEFT = 2
+var DRIGHT = 3
 var direction
 var score
 var curColor
 var food
 var gameOver
+var gameOverText = [
+  'Welcome to Snakes!',
+  'Press space to begin'
+]
 
 var replay
 var replayIndex
@@ -23,32 +27,35 @@ var replaySnake
 var allReplays
 var maxLength
 
+function setSpeed (speed) {
+  frameRate(parseInt(speed))
+}
+
 var socket = io.connect('http://localhost:8080')
-socket.on('init', function (data) {
-  allReplays = data.replays
-})
-socket.on('newReplay', function (data) {
+socket.on('similar', function (data) {
+  console.log(data)
   allReplays.push(data.replay)
+  maxLength = Math.max(maxLength, data.replay[0].length)
 })
 
 function setup () {
   createCanvas(600, 400)
   frameRate(20)
-  reset()
+  reset(true)
   generateFood()
   maxLength = 0
 }
 
 function draw () {
-  background(255)
+  background(0)
   if (replay) {
     if (replayIndex <= maxLength) {
       allReplays.forEach(function (replay) {
-        if (replay[0][replayIndex]) {
-          var color = replay[1]
-          var curReplay = replay[0][replayIndex]
-          var replayFood = curReplay[1]
-          drawSnake(JSON.parse(curReplay[0]), color)
+        if (replay.points[replayIndex]) {
+          var color = replay.color
+          var curReplay = replay.points[replayIndex]
+          var replayFood = curReplay.food
+          drawSnake(JSON.parse(curReplay.snake), color)
           drawFood(replayFood)
         }
       })
@@ -59,8 +66,7 @@ function draw () {
   } else {
     var head = snake[0]
 
-    stroke(0)
-    fill(0)
+    fill(255)
     text(score, 10, 15)
     drawSnake(snake, curColor)
     drawFood(food)
@@ -71,11 +77,12 @@ function draw () {
         if (i > 0) {
           snake[i] = [snake[i - 1][0], snake[i - 1][1]]
         } else {
+          console.log(direction)
           switch (direction) {
-            case UP: snake[i][1] -= 10; break
-            case DOWN: snake[i][1] += 10; break
-            case LEFT: snake[i][0] -= 10; break
-            case RIGHT: snake[i][0] += 10; break
+            case DUP: snake[i][1] -= 10; break
+            case DDOWN: snake[i][1] += 10; break
+            case DLEFT: snake[i][0] -= 10; break
+            case DRIGHT: snake[i][0] += 10; break
           }
         }
       }
@@ -86,7 +93,10 @@ function draw () {
         generateFood()
       }
 
-      replaySnake.push([JSON.stringify(snake), food])
+      replaySnake.push({
+        snake: JSON.stringify(snake),
+        food: food
+      })
 
       snake.forEach(function (coords, i) {
         if (i !== 0 && coords[0] === head[0] && coords[1] === head[1]) {
@@ -97,17 +107,18 @@ function draw () {
         finishGame()
       }
     } else {
-      stroke(0)
-      fill(0)
+      fill(255)
       textAlign(CENTER)
-      textSize(20)
-      text('Game Over!', width / 2, 60)
-      textSize(16)
-      text('Score: ' + score, width / 2, 80)
-      text('Press space to restart', width / 2, 100)
-      if (allReplays.length > 0) {
-        text('Press R to view replay', width / 2, 120)
-      }
+
+      gameOverText.forEach(function (display, i) {
+        if (i === 0) {
+          textSize(20)
+        } else {
+          textSize(16)
+        }
+
+        text(display, width / 2, (20 * i) + 60)
+      })
     }
   }
 }
@@ -115,29 +126,29 @@ function draw () {
 function keyPressed () {
   var head = snake[0]
   var next = snake[1] || head
-  if (keyCode === 38 && directionFrom(head, next) !== DOWN) {
-    direction = UP
-  } else if (keyCode === 40 && directionFrom(head, next) !== UP) {
-    direction = DOWN
-  } else if (keyCode === 37 && directionFrom(head, next) !== RIGHT) {
-    direction = LEFT
-  } else if (keyCode === 39 && directionFrom(head, next) !== LEFT) {
-    direction = RIGHT
+  if (keyCode === 38 && directionFrom(head, next) !== DDOWN) {
+    direction = DUP
+  } else if (keyCode === 40 && directionFrom(head, next) !== DUP) {
+    direction = DDOWN
+  } else if (keyCode === 37 && directionFrom(head, next) !== DRIGHT) {
+    direction = DLEFT
+  } else if (keyCode === 39 && directionFrom(head, next) !== DLEFT) {
+    direction = DRIGHT
   } else if (keyCode === 32 && gameOver) {
-    reset()
+    reset(false)
   } else if (keyCode === 82 && gameOver && allReplays.length > 0) {
     replay = true
     replayIndex = 0
   }
 }
 
-function reset () {
-  gameOver = false
+function reset (over) {
+  gameOver = over
   replay = []
-  direction = RIGHT
+  direction = (rand(0, 2) * 2) + 1
   snake = [[0, 0]]
   score = 0
-  curColor = [rand(0, 150), rand(0, 150), rand(0, 150)]
+  curColor = [rand(150, 256), rand(150, 256), rand(150, 256)]
   replay = false
   replayIndex = 0
   replaySnake = []
@@ -153,24 +164,6 @@ function onSnake (coords) {
   }, false)
 }
 
-function drawSnake (snake, color) {
-  stroke(color[0], color[1], color[2])
-  fill(color[0], color[1], color[2])
-  snake.forEach(function (coords) {
-    rect(coords[0] + 1, coords[1] + 1, 8, 8)
-  })
-}
-
-function drawFood (food) {
-  stroke(255, 0, 0)
-  fill(255, 0, 0)
-  rect(food[0] + 1, food[1] + 1, 8, 8)
-}
-
-function rand (min, max) {
-  return Math.floor(Math.random() * (max - min)) + min
-}
-
 function generateFood () {
   food = [rand(0, width / 10) * 10, rand(0, height / 10) * 10]
   while (onSnake(food)) {
@@ -180,13 +173,13 @@ function generateFood () {
 
 function directionFrom (coords1, coords2) {
   if (coords1[0] < coords2[0]) {
-    return LEFT
+    return DLEFT
   } else if (coords1[0] > coords2[0]) {
-    return RIGHT
+    return DRIGHT
   } else if (coords1[1] < coords2[1]) {
-    return UP
+    return DUP
   } else if (coords1[1] > coords2[1]) {
-    return DOWN
+    return DDOWN
   } else {
     return -1
   }
@@ -194,11 +187,30 @@ function directionFrom (coords1, coords2) {
 
 function finishGame () {
   gameOver = true
-  if (JSON.parse(replaySnake[replaySnake.length - 1][0]).length > 20) {
-    allReplays.push([replaySnake, curColor])
+  if (JSON.parse(replaySnake[replaySnake.length - 1].snake).length > 10) {
+    var rep = {
+      points: replaySnake,
+      color: curColor
+    }
+    allReplays = [rep]
     maxLength = Math.max(maxLength, replaySnake.length)
     socket.emit('gameOver', {
-      replay: [replaySnake, curColor]
+      replay: rep
     })
+
+    gameOverText = [
+      'Game Over!',
+      'Score: ' + score,
+      'Press space to restart',
+      'Press R to view the most similar replay'
+    ]
+  } else {
+    allReplays = []
+    gameOverText = [
+      'Game Over!',
+      'Score: ' + score,
+      'You didn\'t last long enough to save the replay',
+      'Press space to restart'
+    ]
   }
 }

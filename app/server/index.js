@@ -16,11 +16,53 @@ io.on('connection', function (client) {
   })
 
   client.on('gameOver', function (data) {
+    // save the replay
     replays.push(data.replay)
     client.broadcast.emit('newReplay', {
       replay: data.replay
     })
     fs.writeFile(replaysFile, JSON.stringify(replays), 'utf-8')
+
+    // send the most similar replay
+    if (replays.length > 1) {
+      var compare = data.replay
+      var minDelta = Number.MAX_VALUE
+      var minIndex = 0
+      replays.forEach(function (replay, i) {
+        var delta = 0
+        var pointsMin = Math.min(replay.points.length, compare.points.length)
+        for (var j = 0; j < replay.points.length - 1; j++) {
+          var point = replay.points[j]
+          if (j < pointsMin) {
+            var snake = JSON.parse(point.snake)
+            var compareSnake = JSON.parse(compare.points[j].snake)
+            var dx = snake[0][0] - compareSnake[0][0]
+            var dy = snake[0][1] - compareSnake[0][1]
+            var d = Math.sqrt((dx * dx) + (dy * dy))
+            delta += d
+            // var snakeMin = Math.min(snake.length, compareSnake.length)
+            // snake.forEach(function (coords, j) {
+            //   if (j < snakeMin) {
+            //     var dx = coords[0] - compareSnake[j][0]
+            //     var dy = coords[1] - compareSnake[j][1]
+            //     var d = Math.sqrt((dx * dx) - (dy * dy))
+            //     delta += d
+            //   }
+            // })
+          }
+        }
+
+        console.log(i, delta, minDelta)
+        if (delta !== 0 && delta < minDelta) {
+          minDelta = delta
+          minIndex = i
+        }
+      })
+
+      client.emit('similar', {
+        replay: replays[minIndex]
+      })
+    }
   })
 })
 
@@ -59,6 +101,15 @@ app.get('/api/replays', function (req, res) {
       replays: send
     })
   }
+})
+
+app.delete('/api/replays', function (req, res) {
+  replays = []
+  fs.writeFile(replaysFile, JSON.stringify([]), 'utf-8', function (err) {
+    if (!err) {
+      io.emit('deleteReplays')
+    }
+  })
 })
 
 app.use(function (req, res, next) {
