@@ -16,7 +16,7 @@ var curColor
 var food
 var gameOver
 var gameOverText = [
-  'Welcome to Snakes!',
+  'Socket Snakes',
   'Press space to begin'
 ]
 
@@ -31,7 +31,7 @@ function setSpeed (speed) {
   frameRate(parseInt(speed))
 }
 
-var socket = io.connect('http://localhost:8080')
+var socket = io.connect('/')
 socket.on('similar', function (data) {
   allReplays.push(data.replay)
   maxLength = Math.max(maxLength, data.replay.points.length)
