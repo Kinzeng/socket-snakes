@@ -12,10 +12,42 @@ html, body {
 
 input {
   margin: 0 0.5em;
+  width: 30px;
+}
+
+h2 {
+  margin-bottom: 0;
+}
+
+nav {
+  margin: 0.5em 0;
+  width: 75%;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+a, button {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  font-size: 1em;
+  cursor: pointer;
+  text-decoration: underline;
+  outline: none;
+  color: rgb(125, 255, 255);
+}
+
+.selected {
+  font-weight: bold;
 }
 
 .options {
   margin: 1em 0;
+  width: 75%;
+  border: 1px solid white;
 
   display: flex;
   flex-flow: column nowrap;
@@ -30,4 +62,11 @@ input {
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
+}
+
+#afterPlay, #afterReplay {
+  display: none;
+  width: 75%;
+
+  line-height: 2em;
 }

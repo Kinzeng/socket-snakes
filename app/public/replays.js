@@ -41,7 +41,8 @@ socket.on('deleteReplays', function (data) {
 })
 
 function setup () {
-  createCanvas(600, 400)
+  var canvas = createCanvas(600, 400)
+  canvas.parent('sketch')
   frameRate(20)
 }
 
@@ -54,7 +55,7 @@ function draw () {
         var curReplay = replay.points[replayIndex]
         var replayFood = curReplay.food
         drawSnake(JSON.parse(curReplay.snake), color)
-        drawFood(replayFood)
+        drawFood(replayFood, color)
       }
     })
     replayIndex++

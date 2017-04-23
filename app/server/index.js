@@ -12,7 +12,7 @@ var replaysFile = path.join(__dirname, '..', '..', 'replays.json')
 var replays = JSON.parse(fs.readFileSync(replaysFile, 'utf-8'))
 io.on('connection', function (client) {
   client.emit('init', {
-    replays: replays
+    replays: getRandomReplays(20)
   })
 
   client.on('gameOver', function (data) {
@@ -25,42 +25,8 @@ io.on('connection', function (client) {
 
     // send the most similar replay
     if (replays.length > 1) {
-      var compare = data.replay
-      var minDelta = Number.MAX_VALUE
-      var minIndex = 0
-      replays.forEach(function (replay, i) {
-        var delta = 0
-        var pointsMin = Math.min(replay.points.length, compare.points.length)
-        for (var j = 0; j < replay.points.length - 1; j++) {
-          var point = replay.points[j]
-          if (j < pointsMin) {
-            var snake = JSON.parse(point.snake)
-            var compareSnake = JSON.parse(compare.points[j].snake)
-            var dx = snake[0][0] - compareSnake[0][0]
-            var dy = snake[0][1] - compareSnake[0][1]
-            var d = Math.sqrt((dx * dx) + (dy * dy))
-            delta += d
-            // var snakeMin = Math.min(snake.length, compareSnake.length)
-            // snake.forEach(function (coords, j) {
-            //   if (j < snakeMin) {
-            //     var dx = coords[0] - compareSnake[j][0]
-            //     var dy = coords[1] - compareSnake[j][1]
-            //     var d = Math.sqrt((dx * dx) - (dy * dy))
-            //     delta += d
-            //   }
-            // })
-          }
-        }
-
-        console.log(i, delta, minDelta)
-        if (delta !== 0 && delta < minDelta) {
-          minDelta = delta
-          minIndex = i
-        }
-      })
-
       client.emit('similar', {
-        replay: replays[minIndex]
+        replay: getSimilarReplay(data.replay)
       })
     }
   })
@@ -78,12 +44,9 @@ function rand (min, max) {
   return Math.floor(Math.random() * (max - min)) + min
 }
 
-app.get('/api/replays', function (req, res) {
-  var n = parseInt(req.query.n)
+function getRandomReplays (n) {
   if (n > replays.length) {
-    res.send({
-      replays: replays
-    })
+    return replays
   } else {
     var indices = []
     var send = []
@@ -97,20 +60,58 @@ app.get('/api/replays', function (req, res) {
       }
     }
 
-    res.send({
-      replays: send
-    })
+    return send
   }
-})
+}
 
-app.delete('/api/replays', function (req, res) {
-  replays = []
-  fs.writeFile(replaysFile, JSON.stringify([]), 'utf-8', function (err) {
-    if (!err) {
-      io.emit('deleteReplays')
+function getSimilarReplay (compare) {
+  var minDelta = Number.MAX_VALUE
+  var minIndex = 0
+  replays.forEach(function (replay, i) {
+    var delta = 0
+    for (var j = 0; j < Math.max(replay.points.length, compare.points.length); j++) {
+      var snake = JSON.parse(replay.points[Math.min(j, replay.points.length - 1)].snake)
+      var compareSnake = JSON.parse(compare.points[Math.min(j, compare.points.length - 1)].snake)
+      var dx = snake[0][0] - compareSnake[0][0]
+      var dy = snake[0][1] - compareSnake[0][1]
+
+      // var snakeMin = Math.min(snake.length, compareSnake.length)
+      // snake.forEach(function (coords, j) {
+      //   if (j < snakeMin) {
+      //     var dx = coords[0] - compareSnake[j][0]
+      //     var dy = coords[1] - compareSnake[j][1]
+      //     var d = Math.sqrt((dx * dx) + (dy * dy))
+      //     delta += d
+      //   }
+      // })
+      var d = Math.sqrt((dx * dx) + (dy * dy))
+      delta += d
+    }
+
+    if (delta !== 0 && delta < minDelta) {
+      minDelta = delta
+      minIndex = i
     }
   })
+
+  return replays[minIndex]
+}
+
+app.get('/api/replays', function (req, res) {
+  var n = parseInt(req.query.n)
+  res.send({
+    replays: getRandomReplays(n)
+  })
 })
+
+// app.delete('/api/replays', function (req, res) {
+//   replays = []
+//   fs.writeFile(replaysFile, JSON.stringify([]), 'utf-8', function (err) {
+//     if (!err) {
+//       io.emit('deleteReplays')
+//     }
+//   })
+// })
 
 app.use(function (req, res, next) {
   res.send('Oops')

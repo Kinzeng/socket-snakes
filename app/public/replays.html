@@ -10,11 +10,17 @@
     <script src="/replays.js"></script>
   </head>
   <body>
+    <h2>Just a Simple Snake Game, Right?</h2>
+    <nav>
+      <a href="/">Play</a>
+      <span class="selected">Replays</span>
+    </nav>
+    <div id="sketch"></div>
     <div class="options">
       <div class="option">
         Number of Replays: <input id="num" type="number" value="20" onchange="onNumChange()">
       </div>
-      <input type="submit" value="Delete Replays" onclick="deleteJson('/api/replays')">
+      <!-- <input type="submit" value="Delete Replays" onclick="deleteJson('/api/replays')"> -->
     </div>
   </body>
 </html>

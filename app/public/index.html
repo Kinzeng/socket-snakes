@@ -10,10 +10,35 @@
     <script src="/snakes.js"></script>
   </head>
   <body>
+    <h2>Just a Simple Snake Game, Right?</h2>
+    <nav>
+      <span class="selected">Play</span>
+      <a href="/replays">Replays</a>
+    </nav>
+    <div id="sketch"></div>
     <div class="options">
       <div class="option">
         Speed: <input type="number" value="20" onchange="setSpeed(this.value)">
       </div>
+    </div>
+    <div id="afterPlay">
+      <p>
+        That seemed like a pretty basic snake game, and up until this point it was. But a recording of the game you just played was saved and can be viewed alongside all the other people who played this game. Your snake might have been in the same spot at the same time that another's was, but there was no way for you to know until you watch all of these recordings in parallel.
+      </p>
+      <p>
+        Living in New York City, I pass by hundreds of people just on my way to class and I never interact with any of them. It's interesting to think about where they might have come from and where they might be headed. In half an hour I'd be sitting in a lecture I'm probably not paying attention to and they could be on a train to Boston. But for that brief moment in time while we're waiting at that stop light, our lives intersected. Maybe we've stood at that same spot together multiple times before, or maybe that was the first time we had ever "met". Maybe those few seconds of our lives would be the only few seconds we will ever spend in the same spot. The point is, we tend not to think about these things. We tend to focus on our own lives and our own goals. While playing this game, you happened to follow a very similar path as someone else who wandered to this site. <button onclick="startReplay()">Wanna find out who it was?</button>
+      </p>
+      <p>
+        You can also see all the replays at the same time <a href="/replays">here</a>.
+      </p>
+    </div>
+    <div id="afterReplay">
+      <p>
+        As you may have seen, there were points where the two snakes intersected, and there were points where they ran in parallel. I think it's an interesting illustration of how we interact with people, whether they be complete strangers, colleagues, or close friends. We each have our own goals, but that doesn't mean we should block out everyone else's.
+      </p>
+      <p>
+        You can <button onclick="startReplay()">rewatch this replay</button> or watch all the replays at the same time <a href="/replays">here</a>.
+      </p>
     </div>
   </body>
 </html>

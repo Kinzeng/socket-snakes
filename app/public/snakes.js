@@ -33,13 +33,13 @@ function setSpeed (speed) {
 
 var socket = io.connect('http://localhost:8080')
 socket.on('similar', function (data) {
-  console.log(data)
   allReplays.push(data.replay)
-  maxLength = Math.max(maxLength, data.replay[0].length)
+  maxLength = Math.max(maxLength, data.replay.points.length)
 })
 
 function setup () {
-  createCanvas(600, 400)
+  var canvas = createCanvas(600, 400)
+  canvas.parent('sketch')
   frameRate(20)
   reset(true)
   generateFood()
@@ -51,17 +51,22 @@ function draw () {
   if (replay) {
     if (replayIndex <= maxLength) {
       allReplays.forEach(function (replay) {
+        var color = replay.color
+        var curReplay
+        var replayFood
         if (replay.points[replayIndex]) {
-          var color = replay.color
-          var curReplay = replay.points[replayIndex]
-          var replayFood = curReplay.food
-          drawSnake(JSON.parse(curReplay.snake), color)
-          drawFood(replayFood)
+          curReplay = replay.points[replayIndex]
+          replayFood = curReplay.food
+        } else {
+          curReplay = replay.points[replay.points.length - 1]
+          replayFood = curReplay.food
         }
+        drawSnake(JSON.parse(curReplay.snake), color)
+        drawFood(replayFood, color)
       })
       replayIndex++
     } else {
-      replay = false
+      finishReplay()
     }
   } else {
     var head = snake[0]
@@ -77,7 +82,6 @@ function draw () {
         if (i > 0) {
           snake[i] = [snake[i - 1][0], snake[i - 1][1]]
         } else {
-          console.log(direction)
           switch (direction) {
             case DUP: snake[i][1] -= 10; break
             case DDOWN: snake[i][1] += 10; break
@@ -137,8 +141,7 @@ function keyPressed () {
   } else if (keyCode === 32 && gameOver) {
     reset(false)
   } else if (keyCode === 82 && gameOver && allReplays.length > 0) {
-    replay = true
-    replayIndex = 0
+    startReplay()
   }
 }
 
@@ -152,6 +155,8 @@ function reset (over) {
   replay = false
   replayIndex = 0
   replaySnake = []
+  document.getElementById('afterPlay').style.display = 'none'
+  document.getElementById('afterReplay').style.display = 'none'
 }
 
 function onSnake (coords) {
@@ -201,16 +206,28 @@ function finishGame () {
     gameOverText = [
       'Game Over!',
       'Score: ' + score,
-      'Press space to restart',
-      'Press R to view the most similar replay'
+      'Press space to restart'
+      // 'Press R to view the most similar replay'
     ]
+    document.getElementById('afterPlay').style.display = 'block'
   } else {
     allReplays = []
     gameOverText = [
       'Game Over!',
       'Score: ' + score,
-      'You didn\'t last long enough to save the replay',
+      'You didn\'t last long enough to save a replay',
       'Press space to restart'
     ]
   }
+}
+
+function startReplay () {
+  replay = true
+  replayIndex = 0
+}
+
+function finishReplay () {
+  replay = false
+  document.getElementById('afterPlay').style.display = 'none'
+  document.getElementById('afterReplay').style.display = 'block'
 }
