@@ -4,7 +4,9 @@
   "description": "Creative Computing final project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "forever": "NODE_ENV=production sudo forever start -o ./logs/app.log -e ./logs/errors.log -c 'node' ./app/server/index.js",
+    "stop-forever": "forever stopall",
+    "ssh": "gcloud compute --project \"socket-snakes\" ssh --zone \"us-central1-f\" \"socket-snakes-vm\"",
     "dev": "nodemon ./app/server/index.js",
     "start": "NODE_ENV=production node ./app/server/index.js"
   },
@@ -13,6 +15,7 @@
   "dependencies": {
     "body-parser": "^1.17.1",
     "express": "^4.15.2",
+    "forever": "^0.15.3",
     "morgan": "^1.8.1",
     "socket.io": "^1.7.3"
   },
