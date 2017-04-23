@@ -4,8 +4,8 @@
   "description": "Creative Computing final project",
   "main": "index.js",
   "scripts": {
-    "forever": "export NODE_ENV=production; sudo forever start -o ./logs/app.log -e ./logs/errors.log -c 'node' ./app/server/index.js",
-    "stop-forever": "forever stopall",
+    "forever": "sudo NODE_ENV=production forever start -o ./logs/app.log -e ./logs/errors.log ./app/server/index.js",
+    "stop-forever": "sudo forever stopall",
     "ssh": "gcloud compute --project \"socket-snakes\" ssh --zone \"us-central1-f\" \"socket-snakes-vm\"",
     "dev": "nodemon ./app/server/index.js",
     "start": "NODE_ENV=production node ./app/server/index.js"
