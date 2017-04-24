@@ -4,6 +4,7 @@ This is the code for my final project for OART-UT 20: Creative Computing. The ba
 
 Documentation for the replays data structure
 
+```
 [
   {
     points: [
@@ -40,6 +41,7 @@ Documentation for the replays data structure
     "color": [r, g, b]
   }
 ]
+```
 
 To run this project locally:
   * clone this repository to your machine: `git clone https://github.com/Kinzeng/socket-snakes.git`
